@@ -2,40 +2,64 @@
 
 Official repository for the **Resync** company website.
 
-## For developers
+## Project structure
 
-**Read this document before writing any code:**
+```
+Resync/
+├── Frontend/     # Next.js marketing site
+├── Backend/      # Express API stubs (contact + apply forms)
+└── WEBSITE_DEVELOPER_GUIDE.md
+```
+
+## Quick start
+
+### 1. Backend API
+
+```bash
+cd Backend
+npm install
+npm run dev
+# Runs on http://localhost:3001
+```
+
+### 2. Frontend website
+
+```bash
+cd Frontend
+npm install
+cp .env.local.example .env.local
+npm run dev
+# Open http://localhost:3020
+```
+
+The frontend proxies `/api/*` requests to the backend via Next.js rewrites.
+
+## Editing content
+
+All editable content lives in `Frontend/data/`:
+
+| File | What to edit |
+|---|---|
+| `site.json` | Company name, email, phone, location, social links |
+| `team.json` | Team member names, roles, bios, initials |
+| `products.json` | Product cards (Academy, Research Pilots) |
+| `focus-areas.json` | Focus area cards |
+
+Replace placeholder images in `Frontend/public/images/` when assets are ready.
+
+## Deployment
+
+- **Frontend:** Deploy `Frontend/` to [Vercel](https://vercel.com) (set `API_URL` to your backend URL)
+- **Backend:** Deploy `Backend/` to Railway, Render, or similar (set `FRONTEND_URL` to your frontend URL)
+
+## Full specification
 
 👉 **[WEBSITE_DEVELOPER_GUIDE.md](./WEBSITE_DEVELOPER_GUIDE.md)**
 
-That file contains the complete specification:
+## Stack
 
-- Design reference ([Diagonkixa](https://diagonkixa.com))
-- Every page section with exact copy placeholders
-- Component list, file structure, and tech stack
-- Forms, API stubs, responsive rules, SEO, and deployment
-- Deliverables and acceptance criteria
-
-## Quick summary
-
-| Item | Detail |
+| Layer | Tech |
 |---|---|
-| What | Marketing website for an AI research company (agriculture + healthcare) |
-| Layout | Single-page scroll + `/apply` page |
-| Reference | [diagonkixa.com](https://diagonkixa.com) — clone structure, Resync branding |
-| Stack | Next.js (App Router) + TypeScript + Tailwind CSS |
-| Deploy | Vercel |
-| Scope | Front-end only — no auth, payments, or LMS |
-
-## Setup (after code is added)
-
-```bash
-git clone https://github.com/ansulx/Resync.git
-cd Resync
-npm install
-npm run dev
-```
-
-## Questions
-
-Refer to the guide first. If something is not covered in `WEBSITE_DEVELOPER_GUIDE.md`, open a GitHub issue in this repo.
+| Frontend | Next.js 16, React 19, TypeScript, Tailwind CSS 4 |
+| Backend | Express, TypeScript |
+| Icons | Lucide React |
