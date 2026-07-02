@@ -5,10 +5,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { LOGO_SRC, LOGO_ALT } from "@/components/ui/Logo";
 
+// Precomputed to avoid server/client float drift from Math.sin/cos during hydration
+const LOADER_DOTS = [
+  { cx: 85, cy: 50 },
+  { cx: 67.5, cy: 80.310889 },
+  { cx: 32.5, cy: 80.310889 },
+  { cx: 15, cy: 50 },
+  { cx: 32.5, cy: 19.689111 },
+  { cx: 67.5, cy: 19.689111 },
+] as const;
+
 export function AppShell({ children }: { children: ReactNode }) {
-  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    setLoading(true);
     const timer = setTimeout(() => setLoading(false), 2400);
     return () => clearTimeout(timer);
   }, []);
@@ -16,7 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <>
       <AnimatePresence mode="wait">
-        {loading && (
+        {mounted && loading && (
           <motion.div
             key="loader"
             className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#050816]"
@@ -40,23 +53,18 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
 
             <svg className="mt-10 h-24 w-24" viewBox="0 0 100 100" aria-hidden>
-              {[0, 60, 120, 180, 240, 300].map((angle, i) => {
-                const rad = (angle * Math.PI) / 180;
-                const x = 50 + 35 * Math.cos(rad);
-                const y = 50 + 35 * Math.sin(rad);
-                return (
-                  <motion.circle
-                    key={angle}
-                    cx={x}
-                    cy={y}
-                    r="3"
-                    fill="#22C55E"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 1.5, delay: i * 0.15, repeat: Infinity }}
-                  />
-                );
-              })}
+              {LOADER_DOTS.map((dot, i) => (
+                <motion.circle
+                  key={i}
+                  cx={dot.cx}
+                  cy={dot.cy}
+                  r="3"
+                  fill="#22C55E"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0.3, 1, 0.3] }}
+                  transition={{ duration: 1.5, delay: i * 0.15, repeat: Infinity }}
+                />
+              ))}
               <motion.circle
                 cx="50"
                 cy="50"
