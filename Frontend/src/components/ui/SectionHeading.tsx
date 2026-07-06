@@ -13,24 +13,21 @@ export function SectionHeading({
   title,
   subtitle,
   align = "left",
-  light = false,
 }: SectionHeadingProps) {
   const alignClass = align === "center" ? "text-center mx-auto" : "";
-  const titleColor = light ? "text-navy" : "text-white";
-  const subColor = light ? "text-muted" : "text-white/60";
 
   return (
-    <ScrollReveal className={`max-w-3xl ${alignClass}`}>
+    <ScrollReveal className={`max-w-2xl ${alignClass}`}>
       {label && (
-        <p className="font-sub mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-green">
+        <p className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-accent">
           {label}
         </p>
       )}
-      <h2 className={`font-heading text-3xl font-bold leading-tight md:text-5xl ${titleColor}`}>
+      <h2 className="text-3xl font-medium leading-[1.15] tracking-tight text-text md:text-5xl">
         {title}
       </h2>
       {subtitle && (
-        <p className={`font-sub mt-5 text-lg leading-relaxed ${subColor}`}>{subtitle}</p>
+        <p className="mt-6 text-lg leading-relaxed text-muted">{subtitle}</p>
       )}
     </ScrollReveal>
   );

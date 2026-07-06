@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Menu, Moon, Search } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { MagneticButton } from "@/components/ui/MagneticButton";
-import { MobileNav } from "./MobileNav";
 
 const navLinks = [
   { label: "About", href: "#about" },
-  { label: "Services", href: "#services" },
-  { label: "Platform", href: "#platform" },
+  { label: "Technology", href: "#technology" },
   { label: "Products", href: "#products" },
   { label: "Research", href: "#research" },
   { label: "Contact", href: "#contact" },
@@ -30,72 +28,78 @@ export function Header({ homeHref = "/" }: HeaderProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const logoHref = homeHref;
   const anchorPrefix = homeHref === "/" ? "/" : "";
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 sm:px-6">
       <div
-        className={`mx-auto flex max-w-7xl items-center justify-between rounded-2xl border px-4 py-3 transition-all duration-300 sm:px-6 ${
-          scrolled
-            ? "border-slate-200/80 bg-white/95 shadow-lg shadow-black/10 backdrop-blur-xl"
-            : "border-white/60 bg-white/90 shadow-md shadow-black/5 backdrop-blur-xl"
+        className={`mx-auto flex max-w-6xl items-center justify-between rounded-2xl px-4 py-3 transition-all duration-300 sm:px-6 ${
+          scrolled ? "glass shadow-lg shadow-black/20" : "bg-transparent"
         }`}
       >
-        <Logo href={logoHref} variant="header" />
+        <Logo href={homeHref} variant="header" />
 
         <nav className="hidden items-center gap-1 lg:flex">
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={`${anchorPrefix}${link.href}`}
-              className="rounded-xl px-3 py-2 text-sm font-medium text-[#071A2B]/75 transition-colors hover:bg-[#071A2B]/5 hover:text-[#071A2B]"
+              className="rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:text-text"
             >
               {link.label}
             </a>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
-          <button
-            type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-[#071A2B]/50 transition-colors hover:bg-[#071A2B]/5 hover:text-[#071A2B]"
-            aria-label="Search"
-          >
-            <Search className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-[#071A2B]/50 transition-colors hover:bg-[#071A2B]/5 hover:text-[#071A2B]"
-            aria-label="Toggle theme"
-          >
-            <Moon className="h-4 w-4" />
-          </button>
+        <div className="hidden lg:block">
           <MagneticButton
             href={`${anchorPrefix}#contact`}
-            variant="primary"
+            variant="secondary"
             className="!min-h-10 !px-5 !py-2 !text-xs"
           >
-            Request Demo
+            Contact
           </MagneticButton>
         </div>
 
         <button
           type="button"
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white lg:hidden"
-          onClick={() => setMenuOpen(true)}
-          aria-label="Open menu"
+          className="flex h-10 w-10 items-center justify-center rounded-xl glass lg:hidden"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
         >
-          <Menu className="h-5 w-5 text-[#071A2B]" />
+          {menuOpen ? (
+            <X className="h-5 w-5 text-text" />
+          ) : (
+            <Menu className="h-5 w-5 text-text" />
+          )}
         </button>
       </div>
 
-      <MobileNav
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        links={navLinks}
-        anchorPrefix={anchorPrefix}
-      />
+      {menuOpen && (
+        <div className="mx-auto mt-2 max-w-6xl rounded-2xl glass p-4 lg:hidden">
+          <nav className="flex flex-col gap-1">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={`${anchorPrefix}${link.href}`}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-lg px-4 py-3 text-sm text-muted hover:text-text"
+              >
+                {link.label}
+              </a>
+            ))}
+            <div className="mt-2 px-2">
+              <MagneticButton
+                href={`${anchorPrefix}#contact`}
+                variant="primary"
+                className="w-full"
+              >
+                Contact
+              </MagneticButton>
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

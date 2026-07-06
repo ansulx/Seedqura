@@ -102,7 +102,7 @@ export function ApplyForm() {
 
   if (success) {
     return (
-      <div className="rounded-xl bg-green/10 p-6 text-center text-green">
+      <div className="rounded-xl border border-accent/20 bg-accent/5 p-6 text-center text-accent">
         <h2 className="text-xl font-semibold">Application received!</h2>
         <p className="mt-2">
           We&apos;ll review your application and get back to you within 48 hours.
@@ -111,9 +111,8 @@ export function ApplyForm() {
     );
   }
 
-  const inputClass =
-    "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-green/50 focus:ring-2 focus:ring-green/20";
-  const labelClass = "mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40";
+  const inputClass = "input-premium";
+  const labelClass = "mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>

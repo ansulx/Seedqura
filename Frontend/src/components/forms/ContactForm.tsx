@@ -21,8 +21,7 @@ type FormState = {
 
 type FieldErrors = Partial<Record<keyof FormState, string>>;
 
-const inputClass =
-  "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition-colors focus:border-green/50 focus:ring-2 focus:ring-green/20";
+const inputClass = "input-premium";
 
 export function ContactForm() {
   const [form, setForm] = useState<FormState>({
@@ -69,7 +68,7 @@ export function ContactForm() {
 
   if (success) {
     return (
-      <p className="rounded-xl bg-green/10 p-6 text-center text-green">
+      <p className="rounded-xl border border-accent/20 bg-accent/5 p-6 text-center text-accent">
         Thank you! Your message has been received. We&apos;ll get back to you soon.
       </p>
     );
@@ -79,7 +78,7 @@ export function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="contact-name" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
+          <label htmlFor="contact-name" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted">
             Name
           </label>
           <input
@@ -92,7 +91,7 @@ export function ContactForm() {
           {errors.name && <p className="mt-1 text-sm text-red-400">{errors.name}</p>}
         </div>
         <div>
-          <label htmlFor="contact-email" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
+          <label htmlFor="contact-email" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted">
             Email
           </label>
           <input
@@ -108,7 +107,7 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="contact-subject" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
+        <label htmlFor="contact-subject" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted">
           Subject
         </label>
         <select
@@ -117,16 +116,16 @@ export function ContactForm() {
           value={form.subject}
           onChange={(e) => setForm({ ...form, subject: e.target.value })}
         >
-          <option value="" className="bg-navy">Select a subject</option>
+          <option value="" className="bg-card">Select a subject</option>
           {subjects.map((s) => (
-            <option key={s} value={s} className="bg-navy">{s}</option>
+            <option key={s} value={s} className="bg-card">{s}</option>
           ))}
         </select>
         {errors.subject && <p className="mt-1 text-sm text-red-400">{errors.subject}</p>}
       </div>
 
       <div>
-        <label htmlFor="contact-message" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
+        <label htmlFor="contact-message" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted">
           Message
         </label>
         <textarea
