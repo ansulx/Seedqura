@@ -1,11 +1,11 @@
-# Resync — Website Repository
+# Seedqura — Website Repository
 
-Official repository for the **Resync** company website.
+Official repository for the **Seedqura** company website.
 
 ## Project structure
 
 ```
-Resync/
+Seedqura/
 ├── Frontend/     # Next.js marketing site
 ├── Backend/      # Express API stubs (contact + apply forms)
 └── WEBSITE_DEVELOPER_GUIDE.md
