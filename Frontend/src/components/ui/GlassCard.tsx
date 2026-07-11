@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { type ReactNode } from "react";
 
 type GlassCardProps = {
@@ -17,14 +14,10 @@ export function GlassCard({
   className = "",
 }: GlassCardProps) {
   return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className={`glass-card p-8 ${className}`}
-    >
+    <div className={`glass-card p-8 ${className}`}>
       <h3 className="text-lg font-medium text-text">{title}</h3>
       <p className="mt-3 text-sm leading-relaxed text-muted">{description}</p>
       {children}
-    </motion.div>
+    </div>
   );
 }

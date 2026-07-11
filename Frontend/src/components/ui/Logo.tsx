@@ -33,6 +33,7 @@ export function Logo({
       height={variant === "hero" ? 120 : variant === "footer" ? 72 : 56}
       className={`object-contain ${sizes[variant]} ${animate ? "animate-logo" : ""}`}
       priority={variant === "header" || variant === "hero"}
+      unoptimized
     />
   );
 

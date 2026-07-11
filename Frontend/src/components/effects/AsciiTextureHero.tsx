@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
 
 const CHARSET = " .:-=+*#%@";
 const CHARS = CHARSET.split("");
@@ -151,12 +150,7 @@ export function AsciiTextureHero({ className = "" }: AsciiTextureHeroProps) {
       className={`relative flex min-h-[50vh] items-end overflow-hidden pt-28 pb-16 ${className}`}
     >
       <div className="glass-accent absolute inset-0 mx-4 mt-24 rounded-3xl sm:mx-6 lg:mx-auto lg:max-w-6xl" />
-      <motion.div
-        initial={false}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8"
-      >
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <canvas
           ref={canvasRef}
           className="h-[40vh] min-h-[280px] w-full rounded-2xl"
@@ -174,7 +168,7 @@ export function AsciiTextureHero({ className = "" }: AsciiTextureHeroProps) {
             into deployable systems.
           </p>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

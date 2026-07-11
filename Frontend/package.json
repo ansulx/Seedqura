@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3020",
+    "dev": "next dev -p 3020 --webpack",
+    "dev:turbo": "next dev -p 3020",
+    "dev:clean": "rm -rf .next \"$HOME/.cache/seedqura-next\" && next dev -p 3020 --webpack",
+    "dev:stable": "next build && next start -p 3020",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

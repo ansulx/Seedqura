@@ -21,6 +21,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${GeistSans.variable} h-full scroll-smooth`} data-scroll-behavior="smooth">
+      <head>
+        <style>{`
+          html, body {
+            background-color: #f4f2ef;
+            color: #1c1714;
+          }
+        `}</style>
+      </head>
       <body className={`${GeistSans.className} min-h-full flex flex-col antialiased bg-bg text-text`}>{children}</body>
     </html>
   );
