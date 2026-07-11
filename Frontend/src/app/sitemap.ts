@@ -1,8 +1,14 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const base = "https://seedqura.in";
+  const lastModified = new Date();
+
   return [
-    { url: "https://resync.in", lastModified: new Date(), changeFrequency: "monthly", priority: 1 },
-    { url: "https://resync.in/apply", lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    { url: base, lastModified, changeFrequency: "monthly", priority: 1 },
+    { url: `${base}/about`, lastModified, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${base}/products`, lastModified, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${base}/research`, lastModified, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${base}/apply`, lastModified, changeFrequency: "monthly", priority: 0.8 },
   ];
 }

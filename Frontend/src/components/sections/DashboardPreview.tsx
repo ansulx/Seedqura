@@ -34,7 +34,7 @@ export function DashboardPreview() {
                 <span className="h-3 w-3 rounded-full bg-yellow-500/80" />
                 <span className="h-3 w-3 rounded-full bg-green/80" />
               </div>
-              <span className="ml-2 text-xs text-white/40">Resync AI Command Center</span>
+              <span className="ml-2 text-xs text-white/40">Seedqura AI Command Center</span>
             </div>
 
             <div className="grid gap-4 p-4 md:grid-cols-4 md:p-6">

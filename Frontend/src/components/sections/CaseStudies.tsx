@@ -10,7 +10,7 @@ const caseStudies = [
     id: 1,
     title: "Crop Disease Early Detection",
     challenge: "Farmers losing 30% yield due to late disease identification across 500+ hectares.",
-    solution: "Deployed drone + CV pipeline with Resync AI models for real-time disease mapping.",
+    solution: "Deployed drone + CV pipeline with Seedqura AI models for real-time disease mapping.",
     tech: ["Computer Vision", "YOLO", "Drone Analytics", "TensorFlow"],
     metrics: [{ label: "Accuracy", value: "96.4%" }, { label: "Fields", value: "500+" }, { label: "Cost Saved", value: "40%" }],
     impact: "Reduced crop loss by 35% in first season.",
@@ -19,7 +19,7 @@ const caseStudies = [
     id: 2,
     title: "Hospital Medical Imaging AI",
     challenge: "Radiology backlog causing 48-hour diagnostic delays at tertiary hospital.",
-    solution: "Integrated Resync medical imaging AI for X-ray and MRI triage support.",
+    solution: "Integrated Seedqura medical imaging AI for X-ray and MRI triage support.",
     tech: ["Medical AI", "PyTorch", "OpenCV", "Cloud Platform"],
     metrics: [{ label: "Speed", value: "3x faster" }, { label: "Scans", value: "10K+" }, { label: "Accuracy", value: "94.8%" }],
     impact: "Cut diagnostic turnaround from 48h to 16h.",
@@ -46,7 +46,7 @@ export function CaseStudies() {
           light
           label="Case Studies"
           title="Real Impact, Measurable Results"
-          subtitle="How Resync AI solutions transform agriculture and healthcare in the field."
+          subtitle="How Seedqura AI solutions transform agriculture and healthcare in the field."
           align="center"
         />
 

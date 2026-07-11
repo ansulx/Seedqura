@@ -88,7 +88,7 @@ export function ContactForm() {
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
-          {errors.name && <p className="mt-1 text-sm text-red-400">{errors.name}</p>}
+          {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
         </div>
         <div>
           <label htmlFor="contact-email" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted">
@@ -102,7 +102,7 @@ export function ContactForm() {
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
-          {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email}</p>}
+          {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
         </div>
       </div>
 
@@ -121,7 +121,7 @@ export function ContactForm() {
             <option key={s} value={s} className="bg-card">{s}</option>
           ))}
         </select>
-        {errors.subject && <p className="mt-1 text-sm text-red-400">{errors.subject}</p>}
+        {errors.subject && <p className="mt-1 text-sm text-red-600">{errors.subject}</p>}
       </div>
 
       <div>
@@ -136,10 +136,10 @@ export function ContactForm() {
           value={form.message}
           onChange={(e) => setForm({ ...form, message: e.target.value })}
         />
-        {errors.message && <p className="mt-1 text-sm text-red-400">{errors.message}</p>}
+        {errors.message && <p className="mt-1 text-sm text-red-600">{errors.message}</p>}
       </div>
 
-      {formError && <p className="text-sm text-red-400">{formError}</p>}
+      {formError && <p className="text-sm text-red-600">{formError}</p>}
 
       <MagneticButton type="submit" variant="primary" disabled={loading} className="w-full sm:w-auto">
         {loading ? (

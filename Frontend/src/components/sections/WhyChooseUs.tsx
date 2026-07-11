@@ -30,7 +30,7 @@ export function WhyChooseUs() {
   return (
     <SectionWrapper bg="gray">
       <h2 className="text-2xl font-bold text-text-primary md:text-4xl">
-        Why Choose Resync
+        Why Choose Seedqura
       </h2>
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((item) => (

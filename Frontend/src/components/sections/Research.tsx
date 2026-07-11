@@ -1,8 +1,5 @@
 "use client";
 
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { ScrollReveal } from "@/components/motion/ScrollReveal";
-
 const research = [
   {
     year: "2025",
@@ -28,30 +25,21 @@ const research = [
 
 export function Research() {
   return (
-    <section id="research" className="section-padding">
+    <section id="research" className="section-padding pt-0">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <SectionHeading
-          label="Research"
-          title="Evidence over promises"
-          subtitle="Publications, datasets, and pilots — documented work that compounds into deployable systems."
-          align="center"
-        />
-
-        <div className="mt-20 grid gap-4 md:grid-cols-2">
-          {research.map((item, i) => (
-            <ScrollReveal key={item.title} delay={i * 0.08}>
-              <article className="glass-card p-6 md:p-8">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-xs font-medium uppercase tracking-[0.2em] text-accent">
-                    {item.type}
-                  </span>
-                  <span className="text-sm text-muted">{item.year}</span>
-                </div>
-                <h3 className="mt-4 text-lg font-medium leading-snug text-text">
-                  {item.title}
-                </h3>
-              </article>
-            </ScrollReveal>
+        <div className="grid gap-5 md:grid-cols-2">
+          {research.map((item) => (
+            <article key={item.title} className="glass-card p-6 md:p-8">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-xs font-medium uppercase tracking-[0.2em] text-accent">
+                  {item.type}
+                </span>
+                <span className="text-sm text-muted">{item.year}</span>
+              </div>
+              <h3 className="mt-4 text-lg font-medium leading-snug text-text">
+                {item.title}
+              </h3>
+            </article>
           ))}
         </div>
       </div>

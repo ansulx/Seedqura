@@ -4,11 +4,11 @@ import { Logo } from "@/components/ui/Logo";
 import { TextureBackground } from "@/components/effects/TextureBackground";
 
 const footerLinks = [
-  { label: "About", href: "#about" },
-  { label: "Technology", href: "#technology" },
-  { label: "Products", href: "#products" },
-  { label: "Research", href: "#research" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Products", href: "/products" },
+  { label: "Research", href: "/research" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 export function Footer() {
@@ -16,7 +16,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/[0.06] pt-24 pb-10">
+    <footer className="relative overflow-hidden border-t border-[var(--glass-border)] pt-24 pb-10">
       <TextureBackground variant="footer" />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -35,12 +35,12 @@ export function Footer() {
             <ul className="space-y-2">
               {footerLinks.map((link) => (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-sm text-muted transition-colors hover:text-text"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -52,13 +52,16 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-sm text-muted">
               <li>
-                <a href={`mailto:${site.email}`} className="hover:text-accent transition-colors">
+                <a
+                  href={`mailto:${site.email}`}
+                  className="transition-colors hover:text-accent"
+                >
                   {site.email}
                 </a>
               </li>
               <li>{site.location}</li>
               <li>
-                <Link href="/apply" className="hover:text-accent transition-colors">
+                <Link href="/apply" className="transition-colors hover:text-accent">
                   Apply to Academy
                 </Link>
               </li>
@@ -66,7 +69,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 border-t border-white/[0.06] pt-8">
+        <div className="mt-16 border-t border-[var(--glass-border)] pt-8">
           <p className="text-center text-sm text-muted">
             © {year} {site.name}. All rights reserved.
           </p>

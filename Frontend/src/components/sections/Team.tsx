@@ -26,7 +26,7 @@ export function Team() {
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           label="Our Team"
-          title="The Minds Behind Resync"
+          title="The Minds Behind Seedqura"
           subtitle="Researchers, engineers, and innovators driving the future of AI."
           align="center"
         />

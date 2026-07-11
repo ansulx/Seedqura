@@ -21,7 +21,7 @@ export function AIPlatform() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           label="AI Platform"
-          title="The Resync Intelligence Engine"
+          title="The Seedqura Intelligence Engine"
           subtitle="A unified neural architecture connecting agricultural and healthcare data into actionable intelligence."
           align="center"
         />

@@ -7,7 +7,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 
 const testimonials = [
   {
-    quote: "Resync's AI platform transformed our crop monitoring capabilities. The precision and accuracy exceeded our expectations.",
+    quote: "Seedqura's AI platform transformed our crop monitoring capabilities. The precision and accuracy exceeded our expectations.",
     author: "Dr. Rajesh Kumar",
     role: "Director, Agricultural Research Institute",
     initials: "RK",
@@ -19,7 +19,7 @@ const testimonials = [
     initials: "PS",
   },
   {
-    quote: "The Resync Academy produced researchers who are now leading AI projects across our organization.",
+    quote: "The Seedqura Academy produced researchers who are now leading AI projects across our organization.",
     author: "Prof. Amit Verma",
     role: "Dean, University AI Research Lab",
     initials: "AV",

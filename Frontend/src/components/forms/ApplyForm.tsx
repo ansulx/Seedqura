@@ -126,7 +126,7 @@ export function ApplyForm() {
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
-        {errors.name && <p className="mt-1 text-sm text-red-400">{errors.name}</p>}
+        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
       </div>
 
       <div>
@@ -140,7 +140,7 @@ export function ApplyForm() {
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
-        {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email}</p>}
+        {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
       </div>
 
       <div>
@@ -154,7 +154,7 @@ export function ApplyForm() {
           value={form.phone}
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
         />
-        {errors.phone && <p className="mt-1 text-sm text-red-400">{errors.phone}</p>}
+        {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
       </div>
 
       <div>
@@ -168,7 +168,7 @@ export function ApplyForm() {
           onChange={(e) => setForm({ ...form, institution: e.target.value })}
         />
         {errors.institution && (
-          <p className="mt-1 text-sm text-red-400">{errors.institution}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.institution}</p>
         )}
       </div>
 
@@ -189,7 +189,7 @@ export function ApplyForm() {
             </option>
           ))}
         </select>
-        {errors.year && <p className="mt-1 text-sm text-red-400">{errors.year}</p>}
+        {errors.year && <p className="mt-1 text-sm text-red-600">{errors.year}</p>}
       </div>
 
       <div>
@@ -205,7 +205,7 @@ export function ApplyForm() {
           onChange={(e) => setForm({ ...form, portfolio: e.target.value })}
         />
         {errors.portfolio && (
-          <p className="mt-1 text-sm text-red-400">{errors.portfolio}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.portfolio}</p>
         )}
       </div>
 
@@ -226,7 +226,7 @@ export function ApplyForm() {
             </option>
           ))}
         </select>
-        {errors.interest && <p className="mt-1 text-sm text-red-400">{errors.interest}</p>}
+        {errors.interest && <p className="mt-1 text-sm text-red-600">{errors.interest}</p>}
       </div>
 
       <div>
@@ -245,11 +245,11 @@ export function ApplyForm() {
           onChange={(e) => setForm({ ...form, statement: e.target.value })}
         />
         {errors.statement && (
-          <p className="mt-1 text-sm text-red-400">{errors.statement}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.statement}</p>
         )}
       </div>
 
-      {formError && <p className="text-sm text-red-400">{formError}</p>}
+      {formError && <p className="text-sm text-red-600">{formError}</p>}
 
       <MagneticButton type="submit" variant="primary" disabled={loading} className="w-full">
         {loading ? (
