@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { postJson } from "@/lib/api";
 
-const subjects = [
+export const contactSubjects = [
   "General Inquiry",
   "Partnership",
   "Academy",
   "Research Collaboration",
-];
+] as const;
 
 type FormState = {
   name: string;
@@ -23,17 +23,28 @@ type FieldErrors = Partial<Record<keyof FormState, string>>;
 
 const inputClass = "input-premium";
 
-export function ContactForm() {
+type ContactFormProps = {
+  subject?: string;
+  onSubjectChange?: (subject: string) => void;
+};
+
+export function ContactForm({ subject, onSubjectChange }: ContactFormProps) {
   const [form, setForm] = useState<FormState>({
     name: "",
     email: "",
-    subject: "",
+    subject: subject ?? "",
     message: "",
   });
   const [errors, setErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [formError, setFormError] = useState("");
+
+  useEffect(() => {
+    if (subject !== undefined && subject !== form.subject) {
+      setForm((prev) => ({ ...prev, subject }));
+    }
+  }, [subject, form.subject]);
 
   function validate(): FieldErrors {
     const next: FieldErrors = {};
@@ -64,6 +75,11 @@ export function ContactForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function setSubject(value: string) {
+    setForm((prev) => ({ ...prev, subject: value }));
+    onSubjectChange?.(value);
   }
 
   if (success) {
@@ -114,10 +130,10 @@ export function ContactForm() {
           id="contact-subject"
           className={inputClass}
           value={form.subject}
-          onChange={(e) => setForm({ ...form, subject: e.target.value })}
+          onChange={(e) => setSubject(e.target.value)}
         >
           <option value="" className="bg-card">Select a subject</option>
-          {subjects.map((s) => (
+          {contactSubjects.map((s) => (
             <option key={s} value={s} className="bg-card">{s}</option>
           ))}
         </select>

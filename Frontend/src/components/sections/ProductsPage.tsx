@@ -2,10 +2,13 @@
 
 import { Check, Clock, GraduationCap, Layers } from "lucide-react";
 import Link from "next/link";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 import { getCourses } from "@/lib/data";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { TextureBackground } from "@/components/effects/TextureBackground";
+import { DepthField } from "@/components/effects/DepthField";
 
 const categoryStyles: Record<string, string> = {
   Program: "border-accent/30 text-accent bg-accent/5",
@@ -109,7 +112,7 @@ function CourseCard({ course, large = false }: CourseCardProps) {
 
   return (
     <article
-      className={`glass-card flex h-full flex-col ${large ? "p-8 md:p-10" : "p-6 md:p-8"}`}
+      className={`group glass-card flex h-full flex-col ${large ? "p-8 md:p-10" : "p-6 md:p-8"}`}
     >
       <div className="flex flex-wrap items-center gap-2">
         <span
@@ -136,15 +139,15 @@ function CourseCard({ course, large = false }: CourseCardProps) {
 
       <div className="mt-6 flex flex-wrap gap-4 text-xs text-muted">
         <span className="flex items-center gap-1.5">
-          <Clock className="h-3.5 w-3.5 text-accent" />
+          <Clock className="h-3.5 w-3.5 text-accent transition-transform duration-300 group-hover:scale-110" />
           {course.duration}
         </span>
         <span className="flex items-center gap-1.5">
-          <GraduationCap className="h-3.5 w-3.5 text-accent" />
+          <GraduationCap className="h-3.5 w-3.5 text-accent transition-transform duration-300 group-hover:scale-110" />
           {course.level}
         </span>
         <span className="flex items-center gap-1.5">
-          <Layers className="h-3.5 w-3.5 text-accent" />
+          <Layers className="h-3.5 w-3.5 text-accent transition-transform duration-300 group-hover:scale-110" />
           {course.format}
         </span>
       </div>
@@ -156,7 +159,7 @@ function CourseCard({ course, large = false }: CourseCardProps) {
               key={feature}
               className="flex items-start gap-2.5 text-sm text-text/80"
             >
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent transition-transform duration-300 group-hover:scale-110" />
               {feature}
             </li>
           ))}
@@ -186,11 +189,22 @@ function CourseCard({ course, large = false }: CourseCardProps) {
 
 export function ProductsPreview() {
   const courses = getCourses().filter((c) => c.featured).slice(0, 2);
+  const headerRef = useRef(null);
+  const cardsRef = useRef(null);
+  const headerInView = useInView(headerRef, { once: true, margin: "-60px" });
+  const cardsInView = useInView(cardsRef, { once: true, margin: "-40px" });
 
   return (
-    <section id="products" className="section-padding">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <ScrollReveal className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+    <section id="products" className="section-padding relative overflow-hidden">
+      <DepthField tone="accent" />
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <motion.div
+          ref={headerRef}
+          className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end"
+          initial={{ opacity: 0, y: 12 }}
+          animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        >
           <div className="max-w-xl">
             <p className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-accent">
               Products
@@ -205,17 +219,32 @@ export function ProductsPreview() {
           </div>
           <Link
             href="/products"
-            className="shrink-0 text-sm font-medium text-accent transition-colors hover:text-text"
+            className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-accent transition-colors hover:text-text"
           >
-            View all courses →
+            View all courses
+            <span className="inline-block transition-transform duration-300 ease-out group-hover:translate-x-1">
+              →
+            </span>
           </Link>
-        </ScrollReveal>
+        </motion.div>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-2">
+        <div ref={cardsRef} className="mt-16 grid gap-6 md:grid-cols-2">
           {courses.map((course, i) => (
-            <ScrollReveal key={course.id} delay={i * 0.1}>
+            <motion.div
+              key={course.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={
+                cardsInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }
+              }
+              transition={{
+                duration: 0.4,
+                delay: i * 0.08,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="h-full"
+            >
               <CourseCard course={course} />
-            </ScrollReveal>
+            </motion.div>
           ))}
         </div>
       </div>
