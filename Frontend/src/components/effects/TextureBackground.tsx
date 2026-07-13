@@ -21,14 +21,16 @@ export function TextureBackground({
       className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
       aria-hidden
     >
-      <Image
-        src="/hero-texture.png"
-        alt=""
-        fill
-        priority={variant === "hero"}
-        className={`object-cover ${variantStyles[variant]}`}
-        sizes="100vw"
-      />
+      <div className="relative h-full w-full">
+        <Image
+          src="/hero-texture.png"
+          alt=""
+          fill
+          priority={variant === "hero"}
+          className={`object-cover ${variantStyles[variant]}`}
+          sizes="100vw"
+        />
+      </div>
       {variant === "hero" && (
         <div className="absolute inset-0 bg-gradient-to-b from-[#f4f2ef]/30 via-transparent to-[#f4f2ef]" />
       )}

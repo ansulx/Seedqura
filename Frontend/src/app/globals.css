@@ -233,3 +233,21 @@ body {
   border-color: rgba(95, 175, 143, 0.5);
   box-shadow: 0 0 0 3px rgba(95, 175, 143, 0.12);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-logo,
+  .glass-card,
+  .btn-premium {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .glass-card:hover,
+  .btn-premium:hover {
+    transform: none !important;
+  }
+}

@@ -9,9 +9,11 @@ const cacheDir =
   (isDev ? path.join(os.homedir(), ".cache", "seedqura-next") : ".next");
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  allowedDevOrigins: ["72.60.206.223"],
   // Dev cache on local disk — external drives (T7) corrupt .next after HMR.
   distDir: cacheDir,
+  // Explicit empty turbopack config so `next build` works alongside webpack watchOptions.
+  turbopack: {},
   webpack: (config, { dev }) => {
     if (dev) {
       config.watchOptions = {
