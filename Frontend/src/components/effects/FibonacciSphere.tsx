@@ -1,35 +1,49 @@
 "use client";
 
-import { Suspense, useMemo, useRef } from "react";
+import {
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  type RefObject,
+} from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
+import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import * as THREE from "three";
 
 /**
- * Interactive 3D Fibonacci (phyllotaxis) sphere — the Hero's right-side
- * visual. Transparent canvas, no container/card, continuous rotation, a
- * slow cinematic camera fly-through the poles, a cursor-driven repulsion
- * "hole", and a scroll-triggered explode/reform pulse.
+ * Full-hero Fibonacci particle field.
+ * - Idle: dense rotating sphere locked to a DOM anchor (right column),
+ *   so it aligns with the navbar content width.
+ * - Scroll: sphere is destroyed — particles scatter across the hero.
+ * - Idle again: particles reform back into the sphere on the anchor.
+ * - Mouse repulsion uses window-level pointer tracking mapped into the
+ *   canvas, so the hole works over the whole sphere (center included).
  */
 
 const GOLDEN_ANGLE = 137.507764 * (Math.PI / 180);
 const PARTICLE_COUNT = 3400;
-const SPHERE_RADIUS = 1.65;
+const SPHERE_RADIUS = 1.05;
 
-// Mouse repulsion tuning.
-const REPEL_RADIUS = 0.62;
-const REPEL_STRENGTH = 0.8;
+// Fallback world X when no DOM anchor is available yet.
+const SPHERE_OFFSET_X = 2.6;
+
+// Mouse repulsion (only meaningful while the sphere is mostly intact).
+const REPEL_RADIUS = 0.55;
+const REPEL_STRENGTH = 0.85;
 const REPEL_EASE = 0.14;
-// Floor on ray-distance used only to keep the falloff division numerically
-// stable — without it, particles landing almost exactly on the cursor ray
-// get divided by a near-zero distance and fly off to absurd distances.
 const REPEL_MIN_DIST = 0.03;
 
-// Scroll explode/reform tuning.
-const SCROLL_ENERGY_GAIN = 0.003;
+// Scroll destroy / reform. Energy drives blend from sphere → scatter field.
+const SCROLL_ENERGY_GAIN = 0.008;
 const SCROLL_ENERGY_MAX = 1;
-const SCROLL_ENERGY_DECAY = 0.95;
-const SCROLL_SPREAD_MULT = 1.6;
+const SCROLL_ENERGY_DECAY = 0.975;
+
+type PointerState = {
+  x: number;
+  y: number;
+  inside: boolean;
+};
 
 function buildFibonacciSphere(count: number, radius: number) {
   const positions = new Float32Array(count * 3);
@@ -39,40 +53,71 @@ function buildFibonacciSphere(count: number, radius: number) {
     const r = Math.sqrt(Math.max(0, 1 - y * y));
     const theta = GOLDEN_ANGLE * i;
 
-    const x = Math.cos(theta) * r;
-    const z = Math.sin(theta) * r;
-
-    positions[i * 3] = x * radius;
+    positions[i * 3] = Math.cos(theta) * r * radius;
     positions[i * 3 + 1] = y * radius;
-    positions[i * 3 + 2] = z * radius;
+    positions[i * 3 + 2] = Math.sin(theta) * r * radius;
   }
 
   return positions;
 }
 
-type HoverRef = { current: boolean };
+function buildScatterField(count: number) {
+  const positions = new Float32Array(count * 3);
 
-function ParticleSphere({ hoverRef }: { hoverRef: HoverRef }) {
+  for (let i = 0; i < count; i++) {
+    const a = Math.sin(i * 12.9898) * 43758.5453;
+    const b = Math.sin(i * 78.233) * 43758.5453;
+    const c = Math.sin(i * 39.346) * 43758.5453;
+    const rx = a - Math.floor(a);
+    const ry = b - Math.floor(b);
+    const rz = c - Math.floor(c);
+
+    positions[i * 3] = (rx - 0.5) * 12.5;
+    positions[i * 3 + 1] = (ry - 0.5) * 7.2;
+    positions[i * 3 + 2] = (rz - 0.5) * 4.5;
+  }
+
+  return positions;
+}
+
+function ParticleField({
+  pointerRef,
+  anchorRef,
+}: {
+  pointerRef: { current: PointerState };
+  anchorRef?: RefObject<HTMLElement | null>;
+}) {
   const groupRef = useRef<THREE.Group>(null);
   const pointsRef = useRef<THREE.Points>(null);
   const mouse = useRef({ x: 0, y: 0 });
   const targetMouse = useRef({ x: 0, y: 0 });
+  const anchorWorld = useRef(new THREE.Vector3(SPHERE_OFFSET_X, 0, 0));
+  const planeHit = useRef(new THREE.Vector3());
+  const plane = useMemo(
+    () => new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
+    []
+  );
+  const anchorNdc = useRef(new THREE.Vector2());
 
-  // Static reference layout (the pure Fibonacci-sphere positions).
-  const originalPositions = useMemo(
+  const spherePositions = useMemo(
     () => buildFibonacciSphere(PARTICLE_COUNT, SPHERE_RADIUS),
     []
   );
-  // Mutable buffer we ease toward the (repulsion + scroll-spread) target
-  // each frame — this is what's actually rendered.
+  const scatterPositions = useMemo(
+    () => buildScatterField(PARTICLE_COUNT),
+    []
+  );
   const currentPositions = useMemo(
-    () => originalPositions.slice(),
-    [originalPositions]
+    () => spherePositions.slice(),
+    [spherePositions]
   );
 
   const scrollEnergy = useRef(0);
-  const lastScrollY = useRef(0);
+  const lastScrollY = useRef(
+    typeof window !== "undefined" ? window.scrollY || 0 : 0
+  );
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
+  const ndc = useRef(new THREE.Vector2());
   const invQuat = useRef(new THREE.Quaternion());
   const localOrigin = useRef(new THREE.Vector3());
   const localDir = useRef(new THREE.Vector3());
@@ -93,33 +138,44 @@ function ParticleSphere({ hoverRef }: { hoverRef: HoverRef }) {
     }
     const texture = new THREE.CanvasTexture(canvas);
     return new THREE.PointsMaterial({
-      size: 0.052,
+      size: 0.042,
       map: texture,
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
-      vertexColors: false,
       color: new THREE.Color("#ffffff"),
       sizeAttenuation: true,
     });
   }, []);
 
   useFrame((state, delta) => {
-    // --- Continuous multi-axis rotation, with a very subtle cursor tilt.
-    targetMouse.current.x = (state.pointer.x || 0) * 0.15;
-    targetMouse.current.y = (state.pointer.y || 0) * 0.15;
+    const pointer = pointerRef.current;
+    targetMouse.current.x = pointer.x * 0.15;
+    targetMouse.current.y = pointer.y * 0.15;
     mouse.current.x += (targetMouse.current.x - mouse.current.x) * 0.03;
     mouse.current.y += (targetMouse.current.y - mouse.current.y) * 0.03;
 
     const group = groupRef.current;
     if (!group) return;
 
-    group.rotation.y += 0.12 * delta + mouse.current.x * 0.01;
-    group.rotation.x += 0.05 * delta + mouse.current.y * 0.01;
-    group.rotation.z += 0.03 * delta;
+    // Project the right-column DOM anchor into world space so the idle
+    // sphere lines up with the navbar/content column on every resize.
+    const anchor = anchorRef?.current;
+    const canvasEl = state.gl.domElement;
+    if (anchor && canvasEl) {
+      const a = anchor.getBoundingClientRect();
+      const c = canvasEl.getBoundingClientRect();
+      if (a.width > 0 && a.height > 0 && c.width > 0 && c.height > 0) {
+        const nx = ((a.left + a.width / 2 - c.left) / c.width) * 2 - 1;
+        const ny = -((a.top + a.height / 2 - c.top) / c.height) * 2 + 1;
+        anchorNdc.current.set(nx, ny);
+        raycaster.setFromCamera(anchorNdc.current, state.camera);
+        if (raycaster.ray.intersectPlane(plane, planeHit.current)) {
+          anchorWorld.current.copy(planeHit.current);
+        }
+      }
+    }
 
-    // --- Scroll-driven explode energy: spikes on scroll, decays back to 0
-    // (the sphere "explodes" outward and smoothly reforms once idle).
     const scrollY =
       typeof window !== "undefined" ? window.scrollY || 0 : 0;
     const scrollDelta = scrollY - lastScrollY.current;
@@ -129,15 +185,31 @@ function ParticleSphere({ hoverRef }: { hoverRef: HoverRef }) {
       SCROLL_ENERGY_MAX
     );
     scrollEnergy.current *= SCROLL_ENERGY_DECAY;
-    const spreadScale = 1 + scrollEnergy.current * SCROLL_SPREAD_MULT;
 
-    // --- Mouse repulsion ray, transformed into the group's local space so
-    // the "hole" tracks the cursor correctly regardless of rotation.
-    const hovering = hoverRef.current;
+    const e = scrollEnergy.current;
+    const destroy = Math.min(1, e * 1.35);
+
+    const rotFactor = 1 - destroy;
+    group.rotation.y += (0.12 * delta + mouse.current.x * 0.01) * rotFactor;
+    group.rotation.x += (0.05 * delta + mouse.current.y * 0.01) * rotFactor;
+    group.rotation.z += 0.03 * delta * rotFactor;
+
+    // Idle: sit on the navbar-aligned right column. Destroyed: ease to
+    // the hero center so scatter can fill the whole section.
+    const targetX = anchorWorld.current.x * (1 - destroy);
+    const targetY = anchorWorld.current.y * (1 - destroy);
+    group.position.x += (targetX - group.position.x) * 0.12;
+    group.position.y += (targetY - group.position.y) * 0.12;
+
+    const hovering = pointer.inside && destroy < 0.35;
     if (hovering) {
-      raycaster.setFromCamera(state.pointer, state.camera);
+      ndc.current.set(pointer.x, pointer.y);
+      raycaster.setFromCamera(ndc.current, state.camera);
       invQuat.current.copy(group.quaternion).invert();
-      localOrigin.current.copy(raycaster.ray.origin).applyQuaternion(invQuat.current);
+      localOrigin.current
+        .copy(raycaster.ray.origin)
+        .sub(group.position)
+        .applyQuaternion(invQuat.current);
       localDir.current
         .copy(raycaster.ray.direction)
         .applyQuaternion(invQuat.current)
@@ -151,11 +223,21 @@ function ParticleSphere({ hoverRef }: { hoverRef: HoverRef }) {
     const dy = localDir.current.y;
     const dz = localDir.current.z;
 
+    const ease = destroy > 0.08 ? 0.18 : REPEL_EASE;
+
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const idx = i * 3;
-      const bx = originalPositions[idx] * spreadScale;
-      const by = originalPositions[idx + 1] * spreadScale;
-      const bz = originalPositions[idx + 2] * spreadScale;
+
+      const sx = spherePositions[idx];
+      const sy = spherePositions[idx + 1];
+      const sz = spherePositions[idx + 2];
+      const fx = scatterPositions[idx];
+      const fy = scatterPositions[idx + 1];
+      const fz = scatterPositions[idx + 2];
+
+      const bx = sx + (fx - sx) * destroy;
+      const by = sy + (fy - sy) * destroy;
+      const bz = sz + (fz - sz) * destroy;
 
       let pushX = 0;
       let pushY = 0;
@@ -165,39 +247,32 @@ function ParticleSphere({ hoverRef }: { hoverRef: HoverRef }) {
         const vx = bx - ox;
         const vy = by - oy;
         const vz = bz - oz;
-        const t = vx * dx + vy * dy + vz * dz;
+        const t = Math.max(0, vx * dx + vy * dy + vz * dz);
+        const cx = ox + dx * t;
+        const cy = oy + dy * t;
+        const cz = oz + dz * t;
+        const ddx = bx - cx;
+        const ddy = by - cy;
+        const ddz = bz - cz;
+        const distSq = ddx * ddx + ddy * ddy + ddz * ddz;
 
-        if (t > 0) {
-          const cx = ox + dx * t;
-          const cy = oy + dy * t;
-          const cz = oz + dz * t;
-          const ddx = bx - cx;
-          const ddy = by - cy;
-          const ddz = bz - cz;
-          const distSq = ddx * ddx + ddy * ddy + ddz * ddz;
-
-          if (distSq < REPEL_RADIUS * REPEL_RADIUS) {
-            const dist = Math.sqrt(distSq);
-            const falloff = 1 - dist / REPEL_RADIUS;
-            const eased = falloff * falloff;
-            const magnitude = eased * REPEL_STRENGTH;
-            // Scale by dist/safeDist (never > 1) instead of 1/dist directly,
-            // so the push length is provably bounded by `magnitude` even as
-            // dist → 0 (fixes the runaway-explosion bug).
-            const safeDist = Math.max(dist, REPEL_MIN_DIST);
-            const scale = magnitude / safeDist;
-            pushX = ddx * scale;
-            pushY = ddy * scale;
-            pushZ = ddz * scale;
-          }
+        if (distSq < REPEL_RADIUS * REPEL_RADIUS) {
+          const dist = Math.sqrt(distSq);
+          const falloff = 1 - dist / REPEL_RADIUS;
+          const magnitude = falloff * falloff * REPEL_STRENGTH;
+          const safeDist = Math.max(dist, REPEL_MIN_DIST);
+          const scale = magnitude / safeDist;
+          pushX = ddx * scale;
+          pushY = ddy * scale;
+          pushZ = ddz * scale;
         }
       }
 
-      currentPositions[idx] += (bx + pushX - currentPositions[idx]) * REPEL_EASE;
+      currentPositions[idx] += (bx + pushX - currentPositions[idx]) * ease;
       currentPositions[idx + 1] +=
-        (by + pushY - currentPositions[idx + 1]) * REPEL_EASE;
+        (by + pushY - currentPositions[idx + 1]) * ease;
       currentPositions[idx + 2] +=
-        (bz + pushZ - currentPositions[idx + 2]) * REPEL_EASE;
+        (bz + pushZ - currentPositions[idx + 2]) * ease;
     }
 
     const attr = pointsRef.current?.geometry.attributes.position as
@@ -207,7 +282,7 @@ function ParticleSphere({ hoverRef }: { hoverRef: HoverRef }) {
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} position={[SPHERE_OFFSET_X, 0, 0]}>
       <points ref={pointsRef} material={material} frustumCulled={false}>
         <bufferGeometry>
           <bufferAttribute
@@ -220,67 +295,94 @@ function ParticleSphere({ hoverRef }: { hoverRef: HoverRef }) {
   );
 }
 
-/** Gentle, fixed-distance camera sway. The camera never zooms in or out —
- * it simply drifts in a slow, subtle orbit around the sphere so the
- * particle cloud always reads at a consistent size with no risk of
- * overflowing (and clipping against) the canvas frame. */
-function CinematicCamera() {
+function SoftCamera() {
   const { camera } = useThree();
   const t = useRef(0);
-  const BASE_DISTANCE = 5.2;
 
   useFrame((_, delta) => {
     t.current += delta;
-
-    const lateral = Math.sin(t.current * 0.12) * 0.35;
-    const vertical = Math.sin(t.current * 0.09) * 0.25;
-
-    camera.position.set(lateral, vertical, BASE_DISTANCE);
+    camera.position.set(
+      Math.sin(t.current * 0.1) * 0.1,
+      Math.sin(t.current * 0.08) * 0.06,
+      5.8
+    );
     camera.lookAt(0, 0, 0);
   });
 
   return null;
 }
 
-export function FibonacciSphere({ className = "" }: { className?: string }) {
-  const hoverRef = useRef(false);
+export function FibonacciSphere({
+  className = "",
+  anchorRef,
+}: {
+  className?: string;
+  anchorRef?: RefObject<HTMLElement | null>;
+}) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const pointerRef = useRef<PointerState>({ x: 0, y: 0, inside: false });
+
+  useEffect(() => {
+    const onMove = (event: PointerEvent) => {
+      const el = rootRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const inside =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
+
+      if (!inside) {
+        pointerRef.current.inside = false;
+        return;
+      }
+
+      pointerRef.current.x =
+        ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      pointerRef.current.y =
+        -(((event.clientY - rect.top) / rect.height) * 2 - 1);
+      pointerRef.current.inside = true;
+    };
+
+    const onLeave = () => {
+      pointerRef.current.inside = false;
+    };
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("blur", onLeave);
+    document.addEventListener("mouseleave", onLeave);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("blur", onLeave);
+      document.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
 
   return (
     <div
-      className={`pointer-events-auto select-none overflow-hidden ${className}`}
-      style={{
-        maskImage:
-          "radial-gradient(circle at 50% 50%, #000 58%, rgba(0,0,0,0.35) 78%, transparent 100%)",
-        WebkitMaskImage:
-          "radial-gradient(circle at 50% 50%, #000 58%, rgba(0,0,0,0.35) 78%, transparent 100%)",
-      }}
-      onPointerEnter={() => {
-        hoverRef.current = true;
-      }}
-      onPointerLeave={() => {
-        hoverRef.current = false;
-      }}
+      ref={rootRef}
+      className={`pointer-events-none select-none ${className}`}
       aria-hidden
     >
       <Canvas
         gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
         dpr={[1, 1.75]}
-        camera={{ fov: 45, near: 0.1, far: 20, position: [0, 0, 5.2] }}
-        style={{ background: "transparent" }}
+        camera={{ fov: 40, near: 0.1, far: 30, position: [0, 0, 5.8] }}
+        style={{ background: "transparent", pointerEvents: "none" }}
       >
         <Suspense fallback={null}>
           <ambientLight intensity={0.15} />
-          <ParticleSphere hoverRef={hoverRef} />
-          <CinematicCamera />
+          <ParticleField pointerRef={pointerRef} anchorRef={anchorRef} />
+          <SoftCamera />
           <EffectComposer multisampling={4}>
             <Bloom
-              intensity={0.85}
+              intensity={0.8}
               luminanceThreshold={0.15}
               luminanceSmoothing={0.9}
               mipmapBlur
-              radius={0.6}
+              radius={0.55}
             />
-            <Vignette eskil={false} offset={0.25} darkness={0.6} />
           </EffectComposer>
         </Suspense>
       </Canvas>
