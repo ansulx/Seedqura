@@ -3,8 +3,9 @@
 import { Check, Clock, GraduationCap, Layers } from "lucide-react";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
-import { getCourses } from "@/lib/data";
+import { useEffect, useRef, useState } from "react";
+import type { Course } from "@/lib/courses";
+import { fetchCoursesClient } from "@/lib/courses";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { TextureBackground } from "@/components/effects/TextureBackground";
@@ -36,8 +37,17 @@ export function ProductsHero() {
   );
 }
 
-export function CourseCatalog() {
-  const courses = getCourses();
+export function CourseCatalog({ initialCourses }: { initialCourses?: Course[] }) {
+  const [courses, setCourses] = useState<Course[]>(initialCourses || []);
+
+  useEffect(() => {
+    if (initialCourses?.length) {
+      setCourses(initialCourses);
+      return;
+    }
+    fetchCoursesClient().then(setCourses);
+  }, [initialCourses]);
+
   const featured = courses.filter((c) => c.featured);
   const rest = courses.filter((c) => !c.featured);
 
@@ -100,7 +110,7 @@ export function CourseCatalog() {
 }
 
 type CourseCardProps = {
-  course: ReturnType<typeof getCourses>[number];
+  course: Course;
   large?: boolean;
 };
 
@@ -187,12 +197,28 @@ function CourseCard({ course, large = false }: CourseCardProps) {
   );
 }
 
-export function ProductsPreview() {
-  const courses = getCourses().filter((c) => c.featured).slice(0, 2);
+export function ProductsPreview({
+  initialCourses,
+}: {
+  initialCourses?: Course[];
+}) {
+  const [courses, setCourses] = useState<Course[]>(
+    (initialCourses || []).filter((c) => c.featured).slice(0, 2)
+  );
   const headerRef = useRef(null);
   const cardsRef = useRef(null);
   const headerInView = useInView(headerRef, { once: true, margin: "-60px" });
   const cardsInView = useInView(cardsRef, { once: true, margin: "-40px" });
+
+  useEffect(() => {
+    if (initialCourses?.length) {
+      setCourses(initialCourses.filter((c) => c.featured).slice(0, 2));
+      return;
+    }
+    fetchCoursesClient().then((all) =>
+      setCourses(all.filter((c) => c.featured).slice(0, 2))
+    );
+  }, [initialCourses]);
 
   return (
     <section id="products" className="section-padding relative overflow-hidden">

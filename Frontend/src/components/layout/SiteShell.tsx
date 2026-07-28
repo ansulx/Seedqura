@@ -68,6 +68,12 @@ export function SiteShell({ children }: SiteShellProps) {
           </nav>
 
           <div className="hidden items-center gap-3 lg:flex">
+            <Link
+              href="/login"
+              className="rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:text-text"
+            >
+              Login
+            </Link>
             <MagneticButton
               href="/apply"
               variant="secondary"
@@ -119,6 +125,9 @@ export function SiteShell({ children }: SiteShellProps) {
                 );
               })}
               <div className="mt-2 flex flex-col gap-2 px-2">
+                <MagneticButton href="/login" variant="secondary" className="w-full">
+                  Login
+                </MagneticButton>
                 <MagneticButton href="/apply" variant="secondary" className="w-full">
                   Apply
                 </MagneticButton>

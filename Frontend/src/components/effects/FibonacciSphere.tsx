@@ -15,7 +15,8 @@ import * as THREE from "three";
  * Full-hero Fibonacci particle field.
  * - Idle: dense rotating sphere locked to a DOM anchor (right column),
  *   so it aligns with the navbar content width.
- * - Scroll: sphere is destroyed — particles scatter across the hero.
+ * - Scroll: sphere stays intact until ~half has left the viewport, then
+ *   particles scatter across the hero; scrolling back reforms it.
  * - Idle again: particles reform back into the sphere on the anchor.
  * - Mouse repulsion uses window-level pointer tracking mapped into the
  *   canvas, so the hole works over the whole sphere (center included).
@@ -34,10 +35,11 @@ const REPEL_STRENGTH = 0.85;
 const REPEL_EASE = 0.14;
 const REPEL_MIN_DIST = 0.03;
 
-// Scroll destroy / reform. Energy drives blend from sphere → scatter field.
-const SCROLL_ENERGY_GAIN = 0.008;
-const SCROLL_ENERGY_MAX = 1;
-const SCROLL_ENERGY_DECAY = 0.975;
+// Destroy only begins after ~half the globe has scrolled out of the
+// viewport top; it then ramps to full scatter as the rest exits.
+const DESTROY_START_FRAC = 0.5;
+const DESTROY_END_FRAC = 1.0;
+const DESTROY_SMOOTH = 0.08;
 
 type PointerState = {
   x: number;
@@ -112,10 +114,7 @@ function ParticleField({
     [spherePositions]
   );
 
-  const scrollEnergy = useRef(0);
-  const lastScrollY = useRef(
-    typeof window !== "undefined" ? window.scrollY || 0 : 0
-  );
+  const destroyAmount = useRef(0);
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
   const ndc = useRef(new THREE.Vector2());
   const invQuat = useRef(new THREE.Quaternion());
@@ -160,6 +159,8 @@ function ParticleField({
 
     // Project the right-column DOM anchor into world space so the idle
     // sphere lines up with the navbar/content column on every resize.
+    // Also use its viewport rect to decide when destroy should begin.
+    let targetDestroy = 0;
     const anchor = anchorRef?.current;
     const canvasEl = state.gl.domElement;
     if (anchor && canvasEl) {
@@ -173,21 +174,22 @@ function ParticleField({
         if (raycaster.ray.intersectPlane(plane, planeHit.current)) {
           anchorWorld.current.copy(planeHit.current);
         }
+
+        // How much of the globe has scrolled past the top of the viewport.
+        // Stay intact until ~half is gone, then ramp destroy → 1 as the
+        // remainder exits. Scrolling back up reforms the sphere.
+        const scrolledOut = Math.max(0, -a.top);
+        const start = a.height * DESTROY_START_FRAC;
+        const end = a.height * DESTROY_END_FRAC;
+        const span = Math.max(1, end - start);
+        const raw = (scrolledOut - start) / span;
+        targetDestroy = Math.min(1, Math.max(0, raw));
       }
     }
 
-    const scrollY =
-      typeof window !== "undefined" ? window.scrollY || 0 : 0;
-    const scrollDelta = scrollY - lastScrollY.current;
-    lastScrollY.current = scrollY;
-    scrollEnergy.current = Math.min(
-      scrollEnergy.current + Math.abs(scrollDelta) * SCROLL_ENERGY_GAIN,
-      SCROLL_ENERGY_MAX
-    );
-    scrollEnergy.current *= SCROLL_ENERGY_DECAY;
-
-    const e = scrollEnergy.current;
-    const destroy = Math.min(1, e * 1.35);
+    destroyAmount.current +=
+      (targetDestroy - destroyAmount.current) * DESTROY_SMOOTH;
+    const destroy = destroyAmount.current;
 
     const rotFactor = 1 - destroy;
     group.rotation.y += (0.12 * delta + mouse.current.x * 0.01) * rotFactor;

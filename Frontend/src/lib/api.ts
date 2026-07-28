@@ -5,6 +5,14 @@ export type ApiResponse = {
   message?: string;
   error?: string;
   fields?: string[];
+  applicationId?: string;
+  course?: {
+    id: string;
+    name: string;
+    priceInr: number;
+    priceDisplay: string;
+    currency: string;
+  };
 };
 
 export async function postJson<T extends Record<string, unknown>>(
