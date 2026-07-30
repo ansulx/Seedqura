@@ -36,9 +36,6 @@ export function SiteShell({ children }: SiteShellProps) {
     setMenuOpen(false);
   }, [pathname]);
 
-  const contactHref =
-    pathname === "/" ? "#contact" : "/#contact";
-
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 sm:px-6">
@@ -67,26 +64,13 @@ export function SiteShell({ children }: SiteShellProps) {
             })}
           </nav>
 
-          <div className="hidden items-center gap-3 lg:flex">
-            <Link
+          <div className="hidden items-center lg:flex">
+            <MagneticButton
               href="/login"
-              className="rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:text-text"
-            >
-              Login
-            </Link>
-            <MagneticButton
-              href="/apply"
-              variant="secondary"
-              className="!min-h-10 !px-5 !py-2 !text-xs"
-            >
-              Apply
-            </MagneticButton>
-            <MagneticButton
-              href={contactHref}
               variant="primary"
               className="!min-h-10 !px-5 !py-2 !text-xs"
             >
-              Contact
+              Login
             </MagneticButton>
           </div>
 
@@ -124,15 +108,9 @@ export function SiteShell({ children }: SiteShellProps) {
                   </Link>
                 );
               })}
-              <div className="mt-2 flex flex-col gap-2 px-2">
-                <MagneticButton href="/login" variant="secondary" className="w-full">
+              <div className="mt-2 px-2">
+                <MagneticButton href="/login" variant="primary" className="w-full">
                   Login
-                </MagneticButton>
-                <MagneticButton href="/apply" variant="secondary" className="w-full">
-                  Apply
-                </MagneticButton>
-                <MagneticButton href={contactHref} variant="primary" className="w-full">
-                  Contact
                 </MagneticButton>
               </div>
             </nav>

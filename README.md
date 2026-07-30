@@ -49,12 +49,7 @@ Set `API_URL=http://localhost:3001` in `Frontend/.env.local` when testing forms 
 | `/about` | Company story, principles, team |
 | `/products` | Course catalog — Academy, courses, partnerships |
 | `/research` | ASCII texture hero + publications |
-| `/apply` | Course application + Razorpay payment |
-| `/login` | Student / admin sign-in |
-| `/student` | Student dashboard (enrollments) |
-| `/admin` | Admin dashboard (applicants & students) |
-
-See [PLATFORM.md](./PLATFORM.md) for the student pay + admin setup.
+| `/apply` | Seedqura Academy application form |
 
 ## Editing content
 

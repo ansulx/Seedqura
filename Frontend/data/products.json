@@ -4,14 +4,14 @@
       "id": "academy",
       "name": "Seedqura Academy",
       "status": "Now Enrolling",
-      "description": "A structured research mentorship program for students — guided projects in AI for agriculture and medicine.",
+      "description": "A structured research mentorship program for students — guided projects in AI for agriculture and medicine, led by active researchers from leading institutions.",
       "features": [
         "Mentor-led research projects",
         "Live foundational sessions",
         "Publication-oriented outcomes",
         "Certificate on completion"
       ],
-      "cta": { "label": "Apply Now", "href": "/apply?course=academy" },
+      "cta": { "label": "Apply Now", "href": "/apply" },
       "image": "/images/products/academy.jpg",
       "featured": true
     },

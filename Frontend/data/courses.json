@@ -4,7 +4,7 @@
       "id": "academy",
       "name": "Seedqura Academy",
       "tagline": "Research mentorship program",
-      "description": "A structured mentorship for students — guided projects in AI for agriculture and medicine, with hands-on research practice.",
+      "description": "A structured mentorship for students — guided projects in AI for agriculture and medicine, led by active researchers from leading institutions.",
       "category": "Program",
       "level": "Intermediate",
       "duration": "12 weeks",
@@ -20,7 +20,7 @@
         "Publication-oriented outcomes",
         "Certificate on completion"
       ],
-      "cta": { "label": "Apply Now", "href": "/apply?course=academy" }
+      "cta": { "label": "Apply Now", "href": "/apply" }
     },
     {
       "id": "crop-vision",
@@ -42,7 +42,7 @@
         "Model evaluation frameworks",
         "Deployment walkthrough"
       ],
-      "cta": { "label": "Enroll Now", "href": "/apply?course=crop-vision" }
+      "cta": { "label": "Enroll Now", "href": "/#contact" }
     },
     {
       "id": "clinical-ai",
@@ -64,7 +64,7 @@
         "Regulatory awareness module",
         "Case studies from pilots"
       ],
-      "cta": { "label": "Enroll Now", "href": "/apply?course=clinical-ai" }
+      "cta": { "label": "Enroll Now", "href": "/#contact" }
     },
     {
       "id": "remote-sensing",
