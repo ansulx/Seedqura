@@ -19,7 +19,7 @@ async function initLimiters(): Promise<void> {
     const redisReady = await connectRedis();
     const redis = getRedis();
 
-    for (const endpoint of ["contact", "apply"]) {
+    for (const endpoint of ["contact", "apply", "welcome"]) {
       if (redisReady && redis) {
         limiters.set(
           endpoint,
@@ -53,7 +53,7 @@ function getClientIp(req: Request): string {
   return req.ip ?? "unknown";
 }
 
-export function rateLimit(endpoint: "contact" | "apply") {
+export function rateLimit(endpoint: "contact" | "apply" | "welcome") {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       await initLimiters();

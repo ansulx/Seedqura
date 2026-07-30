@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/motion/PageTransition";
+import { createClient } from "@/lib/supabase/client";
 
 const pageLinks = [
   { label: "Home", href: "/" },
@@ -22,8 +23,11 @@ type SiteShellProps = {
 
 export function SiteShell({ children }: SiteShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -35,6 +39,44 @@ export function SiteShell({ children }: SiteShellProps) {
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data }) => {
+      const user = data.user;
+      setUserEmail(user?.email ?? null);
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+        setRole(profile?.role ?? "student");
+      } else {
+        setRole(null);
+      }
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserEmail(session?.user?.email ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  async function logout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUserEmail(null);
+    setRole(null);
+    router.push("/");
+    router.refresh();
+  }
+
+  const hideChrome =
+    pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
+
+  if (hideChrome) {
+    return <>{children}</>;
+  }
 
   return (
     <>
@@ -64,14 +106,34 @@ export function SiteShell({ children }: SiteShellProps) {
             })}
           </nav>
 
-          <div className="hidden items-center lg:flex">
-            <MagneticButton
-              href="/login"
-              variant="primary"
-              className="!min-h-10 !px-5 !py-2 !text-xs"
-            >
-              Login
-            </MagneticButton>
+          <div className="hidden items-center gap-3 lg:flex">
+            {userEmail ? (
+              <>
+                <MagneticButton
+                  href={role === "admin" ? "/admin" : "/dashboard"}
+                  variant="secondary"
+                  className="!min-h-10 !px-5 !py-2 !text-xs"
+                >
+                  {role === "admin" ? "Admin" : "Dashboard"}
+                </MagneticButton>
+                <MagneticButton
+                  type="button"
+                  onClick={logout}
+                  variant="primary"
+                  className="!min-h-10 !px-5 !py-2 !text-xs"
+                >
+                  Log out
+                </MagneticButton>
+              </>
+            ) : (
+              <MagneticButton
+                href="/login"
+                variant="primary"
+                className="!min-h-10 !px-5 !py-2 !text-xs"
+              >
+                Login
+              </MagneticButton>
+            )}
           </div>
 
           <button
@@ -101,17 +163,43 @@ export function SiteShell({ children }: SiteShellProps) {
                     key={link.href}
                     href={link.href}
                     className={`rounded-lg px-4 py-3 text-sm ${
-                      isActive ? "bg-white/60 text-text" : "text-muted hover:text-text"
+                      isActive
+                        ? "bg-white/60 text-text"
+                        : "text-muted hover:text-text"
                     }`}
                   >
                     {link.label}
                   </Link>
                 );
               })}
-              <div className="mt-2 px-2">
-                <MagneticButton href="/login" variant="primary" className="w-full">
-                  Login
-                </MagneticButton>
+              <div className="mt-2 flex flex-col gap-2 px-2">
+                {userEmail ? (
+                  <>
+                    <MagneticButton
+                      href={role === "admin" ? "/admin" : "/dashboard"}
+                      variant="secondary"
+                      className="w-full"
+                    >
+                      {role === "admin" ? "Admin" : "Dashboard"}
+                    </MagneticButton>
+                    <MagneticButton
+                      type="button"
+                      onClick={logout}
+                      variant="primary"
+                      className="w-full"
+                    >
+                      Log out
+                    </MagneticButton>
+                  </>
+                ) : (
+                  <MagneticButton
+                    href="/login"
+                    variant="primary"
+                    className="w-full"
+                  >
+                    Login
+                  </MagneticButton>
+                )}
               </div>
             </nav>
           </div>

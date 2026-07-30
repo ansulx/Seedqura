@@ -64,11 +64,7 @@ export function ContactForm({ subject, onSubjectChange }: ContactFormProps) {
 
     setLoading(true);
     try {
-      const res = await postJson("/api/contact", form);
-      if (!res.ok) {
-        setFormError(res.error || "Something went wrong. Please try again.");
-        return;
-      }
+      await postJson<{ ok?: boolean }>("/api/contact", form);
       setSuccess(true);
     } catch {
       setFormError("Unable to send message. Please try again.");

@@ -3,8 +3,12 @@
 import { Check, Clock, GraduationCap, Layers } from "lucide-react";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
-import { getCourses } from "@/lib/data";
+import { useEffect, useRef, useState } from "react";
+import {
+  fetchPublishedCourses,
+  jsonCatalogFallback,
+  type CatalogCourse,
+} from "@/lib/catalog";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { TextureBackground } from "@/components/effects/TextureBackground";
@@ -15,6 +19,20 @@ const categoryStyles: Record<string, string> = {
   Course: "border-accent-warm/30 text-accent-warm bg-accent-warm/5",
   Partnership: "border-[var(--glass-border)] text-muted bg-white/40",
 };
+
+function usePublishedCourses() {
+  const [courses, setCourses] = useState<CatalogCourse[]>(jsonCatalogFallback);
+  useEffect(() => {
+    let cancelled = false;
+    fetchPublishedCourses().then((list) => {
+      if (!cancelled) setCourses(list);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return courses;
+}
 
 export function ProductsHero() {
   return (
@@ -37,7 +55,7 @@ export function ProductsHero() {
 }
 
 export function CourseCatalog() {
-  const courses = getCourses();
+  const courses = usePublishedCourses();
   const featured = courses.filter((c) => c.featured);
   const rest = courses.filter((c) => !c.featured);
 
@@ -100,15 +118,14 @@ export function CourseCatalog() {
 }
 
 type CourseCardProps = {
-  course: ReturnType<typeof getCourses>[number];
+  course: CatalogCourse;
   large?: boolean;
 };
 
 function CourseCard({ course, large = false }: CourseCardProps) {
   const categoryClass =
     categoryStyles[course.category] ?? categoryStyles.Partnership;
-  const ctaHref =
-    course.cta.href === "/#contact" ? "/#contact" : course.cta.href;
+  const ctaHref = course.cta.href;
 
   return (
     <article
@@ -188,7 +205,8 @@ function CourseCard({ course, large = false }: CourseCardProps) {
 }
 
 export function ProductsPreview() {
-  const courses = getCourses().filter((c) => c.featured).slice(0, 2);
+  const all = usePublishedCourses();
+  const courses = all.filter((c) => c.featured).slice(0, 2);
   const headerRef = useRef(null);
   const cardsRef = useRef(null);
   const headerInView = useInView(headerRef, { once: true, margin: "-60px" });

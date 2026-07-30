@@ -84,14 +84,10 @@ export function ApplyForm() {
 
     setLoading(true);
     try {
-      const res = await postJson("/api/apply", {
+      await postJson<{ ok?: boolean }>("/api/apply", {
         ...form,
         portfolio: form.portfolio.trim() || null,
       });
-      if (!res.ok) {
-        setFormError(res.error || "Something went wrong. Please try again.");
-        return;
-      }
       setSuccess(true);
     } catch {
       setFormError("Unable to submit application. Please try again.");

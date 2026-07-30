@@ -14,11 +14,13 @@
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^4.21.2",
+    "googleapis": "^173.0.0",
     "ioredis": "^5.6.1",
     "nodemailer": "^9.0.3",
     "pg": "^8.22.0",
     "rate-limiter-flexible": "^7.1.1",
-    "razorpay": "^2.9.8"
+    "razorpay": "^2.9.8",
+    "resend": "^6.18.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
