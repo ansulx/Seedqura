@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import { AdminShell } from "@/components/admin/AdminShell";
 
@@ -78,6 +79,7 @@ export default function AdminStudentsPage() {
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Email</th>
               <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Joined</th>
               <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
@@ -87,7 +89,18 @@ export default function AdminStudentsPage() {
                 <td className="px-4 py-3 text-text">{s.full_name || "—"}</td>
                 <td className="px-4 py-3 text-muted">{s.email}</td>
                 <td className="px-4 py-3">{s.status}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-muted">
+                  {s.created_at
+                    ? new Date(s.created_at).toLocaleDateString()
+                    : "—"}
+                </td>
+                <td className="px-4 py-3 space-x-3">
+                  <Link
+                    href={`/admin/students/${s.id}`}
+                    className="text-accent"
+                  >
+                    View
+                  </Link>
                   {s.status === "active" ? (
                     <button
                       type="button"
@@ -108,6 +121,13 @@ export default function AdminStudentsPage() {
                 </td>
               </tr>
             ))}
+            {students.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-6 text-muted">
+                  No students found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

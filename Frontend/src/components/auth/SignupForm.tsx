@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { postJson } from "@/lib/api";
 import { Logo } from "@/components/ui/Logo";
@@ -15,6 +16,7 @@ export function SignupForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +25,6 @@ export function SignupForm() {
     setError("");
     setLoading(true);
     try {
-      // Create account + send welcome/credentials via Resend (not Supabase mail)
       await postJson("/api/student/register", {
         email,
         password,
@@ -36,7 +37,6 @@ export function SignupForm() {
         password,
       });
       if (loginErr) {
-        // Account exists and email was sent; user can log in manually
         router.push(
           `/login?next=${encodeURIComponent(next)}&registered=1`
         );
@@ -92,14 +92,28 @@ export function SignupForm() {
         </label>
         <label className="block text-sm">
           <span className="text-muted">Password</span>
-          <input
-            type="password"
-            required
-            minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1.5 w-full rounded-xl border border-[var(--glass-border)] bg-white/60 px-4 py-3 text-text outline-none focus:border-accent"
-          />
+          <div className="relative mt-1.5">
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-xl border border-[var(--glass-border)] bg-white/60 px-4 py-3 pr-12 text-text outline-none focus:border-accent"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-muted hover:text-text"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </label>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <MagneticButton

@@ -259,12 +259,21 @@ adminRouter.delete("/courses/:id", async (req, res) => {
 adminRouter.get("/enrollments", async (req, res) => {
   try {
     const status = String(req.query.status || "").trim();
+    const paymentStatus = String(req.query.payment_status || "paid").trim();
     const admin = getSupabaseAdmin();
     let query = admin
       .from("enrollments")
-      .select("*, course:courses(id, name), profile:profiles(id, full_name, email)")
+      .select(
+        "*, course:courses(id, name), profile:profiles(id, full_name, email), payments(*)"
+      )
       .order("created_at", { ascending: false });
+
+    // Default: only successfully paid enrollments
+    if (paymentStatus && paymentStatus !== "all") {
+      query = query.eq("payment_status", paymentStatus);
+    }
     if (status) query = query.eq("status", status);
+
     const { data, error } = await query;
     if (error) throw error;
     res.json({ enrollments: data ?? [] });
