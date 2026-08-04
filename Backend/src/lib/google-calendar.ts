@@ -1,3 +1,5 @@
+import { readFileSync, existsSync } from "fs";
+import { resolve } from "path";
 import { google } from "googleapis";
 
 export type CalendarSessionInput = {
@@ -11,17 +13,45 @@ export type CalendarSessionInput = {
   googleEventId?: string | null;
 };
 
+type ServiceAccountCreds = {
+  client_email?: string;
+  private_key?: string;
+};
+
+function loadServiceAccountFile(): ServiceAccountCreds | null {
+  const file =
+    process.env.GOOGLE_SERVICE_ACCOUNT_FILE ||
+    "./credentials/google-calendar.json";
+  const path = resolve(process.cwd(), file);
+  if (!existsSync(path)) return null;
+  try {
+    return JSON.parse(readFileSync(path, "utf8")) as ServiceAccountCreds;
+  } catch (err) {
+    console.error("[google-calendar] failed to read service account file", err);
+    return null;
+  }
+}
+
+function calendarCredentials() {
+  const fromFile = loadServiceAccountFile();
+  const clientEmail =
+    process.env.GOOGLE_CLIENT_EMAIL || fromFile?.client_email || "";
+  const privateKey = (
+    process.env.GOOGLE_PRIVATE_KEY ||
+    fromFile?.private_key ||
+    ""
+  ).replace(/\\n/g, "\n");
+  const calendarId = process.env.GOOGLE_CALENDAR_ID || "";
+  return { clientEmail, privateKey, calendarId };
+}
+
 function calendarConfigured() {
-  return Boolean(
-    process.env.GOOGLE_CLIENT_EMAIL &&
-      process.env.GOOGLE_PRIVATE_KEY &&
-      process.env.GOOGLE_CALENDAR_ID
-  );
+  const { clientEmail, privateKey, calendarId } = calendarCredentials();
+  return Boolean(clientEmail && privateKey && calendarId);
 }
 
 function getAuth() {
-  const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  const { clientEmail, privateKey } = calendarCredentials();
   if (!clientEmail || !privateKey) return null;
   return new google.auth.JWT({
     email: clientEmail,
@@ -64,8 +94,8 @@ export async function upsertCalendarEvent(input: CalendarSessionInput): Promise<
   }
 
   const auth = getAuth();
-  const calendarId = process.env.GOOGLE_CALENDAR_ID!;
-  if (!auth) return { ok: true, skipped: true };
+  const { calendarId } = calendarCredentials();
+  if (!auth || !calendarId) return { ok: true, skipped: true };
 
   try {
     const calendar = google.calendar({ version: "v3", auth });
@@ -99,8 +129,8 @@ export async function deleteCalendarEvent(googleEventId: string | null | undefin
     return { ok: true, skipped: true };
   }
   const auth = getAuth();
-  const calendarId = process.env.GOOGLE_CALENDAR_ID!;
-  if (!auth) return { ok: true, skipped: true };
+  const { calendarId } = calendarCredentials();
+  if (!auth || !calendarId) return { ok: true, skipped: true };
 
   try {
     const calendar = google.calendar({ version: "v3", auth });
